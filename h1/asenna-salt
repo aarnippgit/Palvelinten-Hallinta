@@ -1,0 +1,52 @@
+Tässä tehtävässä asensin Saltin uudelle Debian 13 Trixie virtuaalikoneelle.
+
+--Tiedostojen lataus--
+
+Tarkistin päivitykset
+	$ sudo apt-get update
+
+Asensin wgetin
+	$ sudo apt-get install wget
+
+Tein hakemiston saltrepo/ ja siirryin sinne
+	$ mkdir saltrepo/
+	$ cd saltrepo/
+
+Latasin tiedostot
+	$ wget https://packages.broadcom.com/artifactory/api/security/keypair/SaltProjectKey/public
+	$ wget https://github.com/saltstack/salt-install-guide/releases/latest/download/salt.sources
+
+Tarkastelin tiedostoja:
+	less public	# q quits less
+Avain löytyi ASCII panssarissa.
+	$ less salt.sources
+Signed-by: /etc/apt/keyrings/salt-archive-keyring.pgp
+	$ gpg --show-key --with-fingerprint public
+uid                      Salt Project Packaging <saltproject-packaging@vmware.com>
+
+Vaikutti luotettavalta
+	$ sudo cp public /etc/apt/keyrings/salt-archive-keyring.pgp
+	$ sudo cp salt.sources /etc/apt/sources.list.d/
+
+--Asennus--
+
+Tarkistin päivitykset
+	$ sudo apt-get update
+Asensin Saltin (minionin)
+	$ sudo apt-get install salt-minion
+
+Testasin asentuiko Salt onnistuneesti
+	$ salt --version
+Komento ei toiminut
+	bash: salt: command not found
+Pikainen Googlaus ja https://docs.saltproject.io/en/3006/ref/cli/salt-call.html tarjosi vastaukseksi komennon
+	$ salt-call [options]
+Kokeilin 
+	$ salt-call --version 
+ja tuloksena sain ohjelmaversion:
+	salt-call 3007.8 (Chlorine)
+
+Asennus onnistui.
+
+https://terokarvinen.com/2021/install-debian-on-virtualbox/
+https://terokarvinen.com/palvelinten-hallinta/
