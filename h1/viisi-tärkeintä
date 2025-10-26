@@ -1,0 +1,362 @@
+Tässä tehtävässä kokeilin Saltin viittä tärkeintä tilafunktiota: pkg, file, service, user ja cmd.
+
+1. --pkg--
+
+Komento
+	$ sudo salt-call --local -l info state.single pkg.installed tree
+tarkisti löytyykö tree ja asensi sen. 
+
+[INFO    ] Made the following changes:
+'tree' changed from 'absent' to '2.2.1-1'
+
+[INFO    ] Loading fresh modules for state activity
+[INFO    ] Completed state [tree] at time 16:36:34.160076 (duration_in_ms=2798.635)
+local:
+----------
+          ID: tree
+    Function: pkg.installed
+      Result: True
+     Comment: The following packages were installed/updated: tree
+     Started: 16:36:31.361441
+    Duration: 2798.635 ms
+     Changes:   
+              ----------
+              tree:
+                  ----------
+                  new:
+                      2.2.1-1
+                  old:
+
+Summary for local
+------------
+Succeeded: 1 (changed=1)
+Failed:    0
+------------
+Total states run:     1
+Total run time:   2.799 s
+
+
+
+Uudelleenajettuna komento ei tehnyt mitään koska tree oli jo asenettu ja siihen ei ollut saatavilla päivityksiä.
+
+[INFO    ] All specified packages are already installed
+
+Komento
+	$ sudo salt-call --local -l info state.single pkg.removed tree
+taas tarkisti oliko tree asennettu ja poisti sen
+
+[INFO    ] Made the following changes:
+'tree' changed from '2.2.1-1' to 'absent'
+
+[INFO    ] Loading fresh modules for state activity
+[INFO    ] Completed state [tree] at time 16:51:51.471973 (duration_in_ms=1218.458)
+local:
+----------
+          ID: tree
+    Function: pkg.removed
+      Result: True
+     Comment: All targeted packages were removed.
+     Started: 16:51:50.253515
+    Duration: 1218.458 ms
+     Changes:   
+              ----------
+              tree:
+                  ----------
+                  new:
+                  old:
+                      2.2.1-1
+
+Uudelleenajettuna komento ei tehnyt mitään koska tree oli jo poistettu.
+
+[INFO    ] All specified packages are already absent
+  
+Pkg hallinnoi ohjelmien asennusta, päivitystä ja poistoa.
+
+
+2. --file--
+
+Komento
+	$ sudo salt-call --local -l info state.single file.managed /tmp/helloaarni
+loi tekstitiedoston helloaarni hakemistoon /tmp
+
+
+[INFO    ] {'new': 'file /tmp/helloaarni created'}
+[INFO    ] Completed state [/tmp/helloaarni] at time 17:06:44.608467 (duration_in_ms=5.358)
+local:
+----------
+          ID: /tmp/helloaarni
+    Function: file.managed
+      Result: True
+     Comment: Empty file
+     Started: 17:06:44.603109
+    Duration: 5.358 ms
+     Changes:   
+              ----------
+              new:
+                  file /tmp/helloaarni created
+
+Summary for local
+------------
+Succeeded: 1 (changed=1)
+Failed:    0
+------------
+Total states run:     1
+Total run time:   5.358 ms
+
+Komennon uudelleenajo ei tehnyt mitään koska tiedosto oli jo olemassa.
+
+[INFO    ] File /tmp/helloaarni exists with proper permissions. No changes made.
+ 
+
+komento
+	$ sudo salt-call --local -l info state.single file.managed /tmp/helloaarni contents="foo"
+muutti tiedosto, lisäten sinne "foo".
+
+[INFO    ] File changed:
+--- 
++++ 
+@@ -0,0 +1 @@
++foo
+
+[INFO    ] Completed state [/tmp/helloaarni] at time 17:11:50.296633 (duration_in_ms=7.4)
+local:
+----------
+          ID: /tmp/helloaarni
+    Function: file.managed
+      Result: True
+     Comment: File /tmp/helloaarni updated
+     Started: 17:11:50.289233
+    Duration: 7.4 ms
+     Changes:   
+              ----------
+              diff:
+                  --- 
+                  +++ 
+                  @@ -0,0 +1 @@
+                  +foo
+
+	$ cat /tmp/helloaarni
+	foo
+Muutos tiedostoon näkyy.
+
+Komento 
+	$ sudo salt-call --local -l info state.single file.managed /tmp/helloaarni contents="fii"
+muutti tiedostoa, korvaten "foo":n "fii":llä, eli komento korvaa edellisen sisällön uudella.
+
+[INFO    ] File changed:
+--- 
++++ 
+@@ -1 +1 @@
+-foo
++fii
+
+[INFO    ] Completed state [/tmp/helloaarni] at time 17:16:16.252549 (duration_in_ms=7.84)
+local:
+----------
+          ID: /tmp/helloaarni
+    Function: file.managed
+      Result: True
+     Comment: File /tmp/helloaarni updated
+     Started: 17:16:16.244709
+    Duration: 7.84 ms
+     Changes:   
+              ----------
+              diff:
+                  --- 
+                  +++ 
+                  @@ -1 +1 @@
+                  -foo
+                  +fii
+
+Komento
+	$ sudo salt-call --local -l info state.single file.absent /tmp/helloaarni
+tarkisti onko tiedosto "helloaarni" olemassa ja poisti sen.
+
+[INFO    ] {'removed': '/tmp/helloaarni'}
+[INFO    ] Completed state [/tmp/helloaarni] at time 17:20:09.962345 (duration_in_ms=3.522)
+local:
+----------
+          ID: /tmp/helloaarni
+    Function: file.absent
+      Result: True
+     Comment: Removed file /tmp/helloaarni
+     Started: 17:20:09.958823
+    Duration: 3.522 ms
+     Changes:   
+              ----------
+              removed:
+                  /tmp/helloaarni
+
+Uudelleenajettuna mitään ei tapahtunut koska tiedostoa ei ollut olemassa.
+
+[INFO    ] File /tmp/helloaarni is not present
+
+File luo, muokkaa ja poistaa tiedostoja.
+
+3. --service--
+
+Komento
+	$ sudo salt-call --local -l info state.single service.running ufw enable=True
+kertoi, että ufw on jo päällä. Jos se ei olisi ollut, komento olisi käynnistänyt sen.
+
+[INFO    ] The service ufw is already running
+[INFO    ] Completed state [ufw] at time 17:28:06.597067 (duration_in_ms=37.556)
+local:
+----------
+          ID: ufw
+    Function: service.running
+      Result: True
+     Comment: The service ufw is already running
+     Started: 17:28:06.559511
+    Duration: 37.556 ms
+     Changes:   
+
+Komento
+	$ sudo salt-call --local -l info state.single service.dead ufw enable=False
+sammutti ufw:n
+
+INFO    ] {'ufw': True}
+[INFO    ] Completed state [ufw] at time 17:33:24.299283 (duration_in_ms=2240.051)
+local:
+----------
+          ID: ufw
+    Function: service.dead
+      Result: True
+     Comment: Service ufw has been disabled, and is dead
+     Started: 17:33:22.059232
+    Duration: 2240.051 ms
+     Changes:   
+              ----------
+              ufw:
+                  True
+
+Nyt komennon
+	$ sudo salt-call --local -l info state.single service.running ufw enable=True
+suorittaminen käynnisti ufw:n uudestaan.
+
+[INFO    ] {'ufw': True}
+[INFO    ] Completed state [ufw] at time 17:33:46.021754 (duration_in_ms=1118.891)
+local:
+----------
+          ID: ufw
+    Function: service.running
+      Result: True
+     Comment: Service ufw has been enabled, and is running
+     Started: 17:33:44.902863
+    Duration: 1118.891 ms
+     Changes:   
+              ----------
+              ufw:
+                  True
+Service kertoo onko jokin ohjelma päällä sekä käynnistää ja sammuttaa niitä.
+
+4. --user--
+
+Komento
+	$ sudo salt-call --local -l info state.single user.present aapee
+loi uuden käyttäjän nimellä aapee.
+
+[INFO    ] Executing state user.present for [aapee]
+[INFO    ] Executing command /usr/sbin/useradd in directory '/root'
+[INFO    ] {'gid': 1001, 'groups': ['aapee'], 'home': '/home/aapee', 'name': 'aapee', 'passwd': 'x', 'shell': '/bin/sh', 'uid': 1001, 'fullname': '', 'roomnumber': '', 'workphone': '', 'homephone': '', 'other': ''}
+[INFO    ] Completed state [aapee] at time 17:35:18.792783 (duration_in_ms=39.804)
+local:
+----------
+          ID: aapee
+    Function: user.present
+      Result: True
+     Comment: New user aapee created
+     Started: 17:35:18.752979
+    Duration: 39.804 ms
+     Changes:   
+              ----------
+              fullname:
+              gid:
+                  1001
+              groups:
+                  - aapee
+              home:
+                  /home/aapee
+              homephone:
+              name:
+                  aapee
+              other:
+              passwd:
+                  x
+              roomnumber:
+              shell:
+                  /bin/sh
+              uid:
+                  1001
+              workphone:
+
+	ls /home/
+	aapee  aarnip
+
+Uudelleenajettaessa mitään ei tehty koska aapee niminen käyttäjä oli jo olemassa.
+
+[INFO    ] User aapee is present and up to date
+ 
+
+Komento
+	$ sudo salt-call --local -l info state.single user.absent aapee
+poisti luodun käyttäjän.
+
+[INFO    ] {'aapee group': 'removed', 'aapee': 'removed'}
+[INFO    ] Completed state [aapee] at time 17:39:51.437560 (duration_in_ms=33.316)
+local:
+----------
+          ID: aapee
+    Function: user.absent
+      Result: True
+     Comment: Removed user aapee
+     Started: 17:39:51.404244
+    Duration: 33.316 ms
+     Changes:   
+              ----------
+              aapee:
+                  removed
+              aapee group:
+                  removed
+
+User luo ja poistaa käyttäjiä.
+
+
+5. --cmd--
+
+Komento
+	sudo salt-call --local -l info state.single cmd.run 'touch /tmp/foo' creates="/tmp/foo"
+loi tiedoston "foo" hakemistoon /tmp
+
+[INFO    ] Executing state cmd.run for [touch /tmp/foo]
+[INFO    ] Executing command 'touch' in directory '/root'
+[INFO    ] {'pid': 2630, 'retcode': 0, 'stdout': '', 'stderr': ''}
+[INFO    ] Completed state [touch /tmp/foo] at time 17:44:14.498456 (duration_in_ms=961.801)
+local:
+----------
+          ID: touch /tmp/foo
+    Function: cmd.run
+      Result: True
+     Comment: Command "touch /tmp/foo" run
+     Started: 17:44:13.536655
+    Duration: 961.801 ms
+     Changes:   
+              ----------
+              pid:
+                  2630
+              retcode:
+                  0
+              stderr:
+              stdout:
+
+Uudelleenajettuna mitään ei tapahtunut koska tiedosto oli jo olemassa halutussa hakemistossa.
+
+[INFO    ] ['/tmp/foo exists']
+
+cdm suorittaa komentoja ehdollisesti.
+
+## lähteet
+https://docs.saltproject.io/en/3007/ref/states/all/salt.states.cmd.html
+https://terokarvinen.com/2021/salt-run-command-locally/
+
+
