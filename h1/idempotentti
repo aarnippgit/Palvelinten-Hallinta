@@ -1,0 +1,48 @@
+Idempotentti komento on sellainen, joka voidaan suorittaa useita kertoja ilman että sen vaikutus muuttuu.
+
+Esimerkiksi komento
+	$ sudo salt-call --local -l info state.single pkg.installed tree
+tarkistaa, onko tree asennettu järjestelmään, ja asentaa, päivittää tai on tekemättä mitään riippuen siitä, löytyykö ohjelmaa ja onko se uusimmassa versiossa.
+
+Kun ohjelmaa ei löydy:
+
+[INFO    ] Made the following changes:
+'tree' changed from 'absent' to '2.2.1-1'
+
+[INFO    ] Loading fresh modules for state activity
+[INFO    ] Completed state [tree] at time 16:36:34.160076 (duration_in_ms=2798.635)
+local:
+----------
+          ID: tree
+    Function: pkg.installed
+      Result: True
+     Comment: The following packages were installed/updated: tree
+     Started: 16:36:31.361441
+    Duration: 2798.635 ms
+     Changes:   
+              ----------
+              tree:
+                  ----------
+                  new:
+                      2.2.1-1
+                  old:
+
+Kun ohjelman uusin versio on jo asennettu:
+
+[INFO    ] All specified packages are already installed
+[INFO    ] Completed state [tree] at time 18:00:11.071706 (duration_in_ms=57.688)
+local:
+----------
+          ID: tree
+    Function: pkg.installed
+      Result: True
+     Comment: All specified packages are already installed
+     Started: 18:00:11.014018
+    Duration: 57.688 ms
+     Changes:   
+
+## lähteet
+
+https://fi.wikipedia.org/wiki/Idempotenssi
+https://terokarvinen.com/palvelinten-hallinta/
+https://terokarvinen.com/2021/salt-run-command-locally/
